@@ -1,21 +1,34 @@
-# GigTask — Complete Setup, Workflow Demo & Verification Guide
+# GigTask — Complete Setup, Run & Verification Guide
 
-This README is written for an evaluator who has **only the GitHub repository** and wants to run the project from start to finish.
+This README is the **step-by-step evaluator guide** for the GigTask database assignment.
 
-The four assignment workflows are explicitly mapped below to the exact source files and commands.
+A person who clones this GitHub repository should be able to:
+
+1. Clone the repository.
+2. Install dependencies.
+3. Create and configure PostgreSQL.
+4. Create the PostgreSQL schema, indexes, trigger, procedures and materialized view.
+5. Generate the required PostgreSQL data at scale.
+6. Run and verify PostgreSQL Workflow 1 and Workflow 2.
+7. Configure MongoDB.
+8. Create MongoDB collections/indexes.
+9. Generate the required MongoDB data at scale.
+10. Run and verify MongoDB Workflow 3 and Workflow 4.
+11. Check all assignment requirements.
+12. Check the performance evidence files.
 
 ---
 
-# 1. Assignment Workflows — Where They Are Implemented
+# 1. Assignment Workflow Mapping
 
-| Workflow | Requirement | Implementation file | Database |
+These are the four required complex workflows and the exact files that implement them.
+
+| Workflow | Assignment requirement | File | Database |
 |---|---|---|---|
-| **Workflow 1** | Atomic Gig Funding using PL/pgSQL stored procedure | `sql/04_stored_procedures.sql` | PostgreSQL |
-| **Workflow 2** | 7-day moving average using CTEs/window functions + `DENSE_RANK()` | `sql/06_window_analytics.sql` | PostgreSQL |
-| **Workflow 3** | Find nearest available worker using `$geoNear` | `mongo/02_workflow3_geonear.js` | MongoDB |
-| **Workflow 4** | `$facet` with rating distribution, `$unwind` top skill tags, worker ratings | `mongo/03_workflow4_facet.js` | MongoDB |
-
-The evaluator should not have to guess which file implements which requirement.
+| Workflow 1 | Atomic Gig Funding using PL/pgSQL stored procedure | `sql/04_stored_procedures.sql` | PostgreSQL |
+| Workflow 2 | 7-day moving average using CTEs/window functions and `DENSE_RANK()` | `sql/06_window_analytics.sql` | PostgreSQL |
+| Workflow 3 | Nearest available worker using `$geoNear` | `mongo/02_workflow3_geonear.js` | MongoDB |
+| Workflow 4 | Multi-faceted review analytics using `$facet` and `$unwind` | `mongo/03_workflow4_facet.js` | MongoDB |
 
 ---
 
@@ -30,11 +43,6 @@ GigTask/
 │   ├── postgres_seeder.py
 │   └── mongo_seeder.py
 │
-├── mongo/
-│   ├── 01_collections_and_indexes.js
-│   ├── 02_workflow3_geonear.js
-│   └── 03_workflow4_facet.js
-│
 ├── sql/
 │   ├── 01_schema_ddl.sql
 │   ├── 02_indexes.sql
@@ -42,6 +50,11 @@ GigTask/
 │   ├── 04_stored_procedures.sql
 │   ├── 05_materialized_views.sql
 │   └── 06_window_analytics.sql
+│
+├── mongo/
+│   ├── 01_collections_and_indexes.js
+│   ├── 02_workflow3_geonear.js
+│   └── 03_workflow4_facet.js
 │
 ├── performance/
 │   ├── postgres_explain_analyzes.txt
@@ -54,11 +67,12 @@ GigTask/
 
 # 3. Prerequisites
 
-Install:
+Install the following before starting:
 
 ```text
 Git
 Python 3
+pip
 PostgreSQL
 MongoDB
 mongosh
@@ -69,39 +83,65 @@ Check:
 ```bash
 git --version
 python3 --version
+pip --version
 psql --version
 mongosh --version
 ```
 
+Start PostgreSQL and MongoDB using the normal service method for your operating system.
+
 ---
 
-# 4. Clone and Enter the Project
+# 4. Clone the GitHub Repository
+
+Replace the repository URL with the actual GitHub repository URL.
 
 ```bash
 git clone <YOUR_GITHUB_REPOSITORY_URL>
+```
+
+Enter the project:
+
+```bash
 cd GigTask
 ```
 
-Verify:
+Check:
 
 ```bash
 ls
 ```
 
+You should see directories such as:
+
+```text
+data_generation
+mongo
+performance
+sql
+docs
+```
+
 ---
 
-# 5. Python Setup
+# 5. Create Python Virtual Environment
 
-Create virtual environment:
+From the project root:
 
 ```bash
 python3 -m venv venv
 ```
 
-Activate:
+Activate it on macOS/Linux:
 
 ```bash
 source venv/bin/activate
+```
+
+On Windows:
+
+```powershell
+venv\Scripts\activate
 ```
 
 Install dependencies:
@@ -112,17 +152,15 @@ pip install -r requirements.txt
 
 ---
 
-# 6. PostgreSQL Setup
+# 6. PostgreSQL — Create Database
 
-## 6.1 Create Database
-
-If `gigtask` does not exist:
+If the database does not already exist:
 
 ```bash
 createdb gigtask
 ```
 
-Or:
+Alternative:
 
 ```bash
 psql postgres
@@ -137,9 +175,9 @@ CREATE DATABASE gigtask;
 
 ---
 
-## 6.2 Set Connection
+# 7. PostgreSQL — Configure Connection
 
-Example for a local PostgreSQL user:
+For a local PostgreSQL installation:
 
 ```bash
 export DATABASE_URL="dbname=gigtask user=$USER host=localhost port=5432"
@@ -151,13 +189,13 @@ If the PostgreSQL username is different:
 export DATABASE_URL="dbname=gigtask user=<YOUR_POSTGRES_USER> host=localhost port=5432"
 ```
 
-Test:
+Test the connection:
 
 ```bash
 psql "$DATABASE_URL"
 ```
 
-The prompt should become:
+Expected prompt:
 
 ```text
 gigtask=#
@@ -169,13 +207,29 @@ Exit:
 \q
 ```
 
-> **Important:** `SELECT` and `CALL` are PostgreSQL commands. They must be run after the `gigtask=#` prompt appears, not directly in the macOS/Linux terminal.
+## Important
+
+Commands such as:
+
+```sql
+SELECT ...
+CALL ...
+CREATE ...
+```
+
+must be run inside `psql`, where the prompt looks like:
+
+```text
+gigtask=#
+```
+
+Do not run PostgreSQL SQL directly at the normal terminal prompt.
 
 ---
 
-# 7. Create PostgreSQL Tables
+# 8. PostgreSQL — Create Tables
 
-Run from the project root:
+Run from the repository root:
 
 ```bash
 psql "$DATABASE_URL" -f sql/01_schema_ddl.sql
@@ -192,7 +246,9 @@ wallet_audit_logs
 
 ---
 
-# 8. Create PostgreSQL Indexes
+# 9. PostgreSQL — Create Required Indexes
+
+Run:
 
 ```bash
 psql "$DATABASE_URL" -f sql/02_indexes.sql
@@ -206,11 +262,13 @@ ON contracts(freelancer_id)
 WHERE status = 'IN PROGRESS';
 ```
 
-This is the required partial unique index preventing a freelancer from having multiple active gigs.
+This is the required partial unique index for active gigs.
 
 ---
 
-# 9. Create Escrow Audit Trigger
+# 10. PostgreSQL — Create Escrow Audit Trigger
+
+Run:
 
 ```bash
 psql "$DATABASE_URL" -f sql/03_triggers_and_audit.sql
@@ -254,7 +312,7 @@ Exit:
 
 ---
 
-# 10. Create Workflow 1 Stored Procedure
+# 11. PostgreSQL — Create Workflow 1 Stored Procedure
 
 Run:
 
@@ -282,7 +340,7 @@ fund_gig | PROCEDURE
 
 ---
 
-# 11. Create Workflow 1 Materialized-View Support
+# 12. PostgreSQL — Create Materialized View
 
 Run:
 
@@ -294,39 +352,51 @@ This creates:
 
 ```text
 freelancer_lifetime_stats
+```
+
+and:
+
+```text
 refresh_freelancer_lifetime_stats()
 ```
 
-Verify:
-
-```sql
-SELECT COUNT(*)
-FROM freelancer_lifetime_stats;
-```
-
-After data generation, refresh:
+After data generation, refresh it:
 
 ```sql
 CALL refresh_freelancer_lifetime_stats();
 ```
 
+Verify:
+
+```sql
+SELECT *
+FROM freelancer_lifetime_stats
+ORDER BY total_earnings DESC
+LIMIT 5;
+```
+
 ---
 
-# 12. Generate PostgreSQL Stress-Test Data
+# 13. PostgreSQL — Generate Required Data
 
-The generator is:
+The PostgreSQL generator is:
 
 ```text
 data_generation/postgres_seeder.py
 ```
 
-Its default generation targets are:
+The default targets in the script are:
 
 ```text
-1,000 clients
-5,000 freelancers
-50,000 contracts
-100,000 wallet audit entries
+CLIENTS     = 1000
+FREELANCERS = 5000
+CONTRACTS   = 50000
+```
+
+The script also fills `wallet_audit_logs` to at least:
+
+```text
+100000
 ```
 
 Run:
@@ -335,77 +405,95 @@ Run:
 python3 data_generation/postgres_seeder.py
 ```
 
-Verify:
+The script uses the `DATABASE_URL` environment variable.
+
+---
+
+# 14. PostgreSQL — Verify Data Scale
+
+Open PostgreSQL:
 
 ```bash
 psql "$DATABASE_URL"
 ```
 
+Run:
+
 ```sql
-SELECT COUNT(*) AS clients FROM clients;
-SELECT COUNT(*) AS freelancers FROM freelancers;
-SELECT COUNT(*) AS contracts FROM contracts;
-SELECT COUNT(*) AS audit_logs FROM wallet_audit_logs;
+SELECT COUNT(*) AS clients
+FROM clients;
+
+SELECT COUNT(*) AS freelancers
+FROM freelancers;
+
+SELECT COUNT(*) AS contracts
+FROM contracts;
+
+SELECT COUNT(*) AS audit_logs
+FROM wallet_audit_logs;
 ```
 
-Required:
+Required minimums:
 
 ```text
-contracts   >= 50,000
-audit_logs  >= 100,000
+contracts   >= 50000
+audit_logs  >= 100000
+```
+
+Expected project-scale data:
+
+```text
+clients              1000
+freelancers          5000
+contracts           50000
+wallet_audit_logs   100000
 ```
 
 ---
 
-# 13. WORKFLOW 1 — ATOMIC GIG FUNDING
+# 15. WORKFLOW 1 — Atomic Gig Funding
 
-## Assignment Requirement
+## Requirement
 
-> Write a PL/pgSQL Stored Procedure that safely deducts client funds into escrow, creates a contract, and commits atomically.
+The assignment asks for:
 
-## Source File
+> A PL/pgSQL Stored Procedure that safely deducts client funds into escrow, creates a contract, and commits atomically.
+
+## Implementation
+
+File:
 
 ```text
 sql/04_stored_procedures.sql
 ```
 
-## What to Verify
-
-The procedure is:
+Procedure:
 
 ```text
 fund_gig(...)
 ```
 
-It performs:
+The procedure validates the request, locks the client row, checks the balance, deducts the budget, and inserts a `FUNDED` contract.
+
+## Verify the Procedure
+
+Inside `psql`:
+
+```sql
+SELECT routine_name, routine_type
+FROM information_schema.routines
+WHERE routine_name = 'fund_gig';
+```
+
+Expected:
 
 ```text
-Validate budget
-      ↓
-Lock client row with FOR UPDATE
-      ↓
-Check client exists
-      ↓
-Check sufficient escrow balance
-      ↓
-Check freelancer exists
-      ↓
-Deduct escrow balance
-      ↓
-Create FUNDED contract
-      ↓
-Complete as one database transaction
+fund_gig | PROCEDURE
 ```
 
 ## Run a Real Test
 
-Inside:
-
-```text
-gigtask=#
-```
-
-Get a client:
+Get one client:
 
 ```sql
 SELECT id, escrow_balance
@@ -413,7 +501,7 @@ FROM clients
 LIMIT 1;
 ```
 
-Get a freelancer:
+Get one freelancer:
 
 ```sql
 SELECT id, name
@@ -421,7 +509,7 @@ FROM freelancers
 LIMIT 1;
 ```
 
-Then use those real IDs:
+Use the returned IDs:
 
 ```sql
 CALL fund_gig(
@@ -437,7 +525,7 @@ Expected:
 CALL
 ```
 
-Verify the balance:
+Verify the client balance:
 
 ```sql
 SELECT escrow_balance
@@ -445,7 +533,11 @@ FROM clients
 WHERE id = '<CLIENT_ID>';
 ```
 
-The balance should be reduced by `100.00`.
+The balance should decrease by:
+
+```text
+100.00
+```
 
 Verify the contract:
 
@@ -468,7 +560,7 @@ budget | 100.00
 status | FUNDED
 ```
 
-Verify the audit:
+Verify the audit record:
 
 ```sql
 SELECT client_id,
@@ -482,55 +574,49 @@ ORDER BY created_at DESC
 LIMIT 5;
 ```
 
-### Workflow 1 Pass Condition
+### Workflow 1 Pass
 
 ```text
-[ ] fund_gig exists as PROCEDURE
-[ ] CALL executes successfully
-[ ] escrow balance decreases by requested budget
+[ ] fund_gig procedure exists
+[ ] CALL executes
+[ ] escrow balance decreases
 [ ] FUNDED contract is created
-[ ] audit entry is generated
+[ ] audit entry is visible
 ```
 
 ---
 
-# 14. WORKFLOW 2 — SQL WINDOW ANALYTICS
+# 16. WORKFLOW 2 — SQL Window Analytics
 
-## Assignment Requirement
+## Requirement
 
-> Utilize CTEs and Window Functions to compute the 7-day moving average of contract revenue per freelancer, ranked by DENSE RANK().
+The assignment asks for:
 
-## Source File
+> CTEs and Window Functions to compute the 7-day moving average of contract revenue per freelancer, ranked by `DENSE_RANK()`.
+
+## Implementation
+
+File:
 
 ```text
 sql/06_window_analytics.sql
 ```
 
-## Required SQL Concepts
-
-The file contains:
+The implementation uses:
 
 ```text
-CTE daily_revenue
-CTE moving
-CTE latest
+daily_revenue CTE
+moving CTE
+latest CTE
 AVG(...) OVER(...)
 PARTITION BY freelancer_id
 RANGE BETWEEN INTERVAL '6 days' PRECEDING AND CURRENT ROW
 DENSE_RANK() OVER(...)
 ```
 
-The query:
+## Run
 
-1. Selects completed contracts.
-2. Calculates daily revenue per freelancer.
-3. Calculates the 7-day moving average.
-4. Takes the latest available day for each freelancer.
-5. Ranks freelancers using `DENSE_RANK()`.
-
-## Run It
-
-From the project root:
+From the repository root:
 
 ```bash
 psql "$DATABASE_URL" -f sql/06_window_analytics.sql
@@ -555,39 +641,44 @@ freelancer_id | revenue_day | moving_average_7d | freelancer_rank
 ...           | 2026-...    |  8989.38          | 3
 ```
 
-### Workflow 2 Pass Condition
+### Workflow 2 Pass
 
 ```text
-[ ] CTEs are present
+[ ] CTEs are used
+[ ] Daily completed-contract revenue is calculated
 [ ] 7-day moving average is calculated
-[ ] Calculation is partitioned by freelancer
+[ ] Per-freelancer partition is used
 [ ] DENSE_RANK() is used
-[ ] Query executes and returns ranked results
+[ ] Query returns results
 ```
 
 ---
 
-# 15. MongoDB Setup
+# 17. MongoDB — Select Database
 
-Start MongoDB using the normal service method for your operating system.
-
-Open:
+Start MongoDB shell:
 
 ```bash
 mongosh
 ```
 
-Select database:
+Select:
 
 ```javascript
 use("gigtask");
 ```
 
+Expected:
+
+```text
+switched to db gigtask
+```
+
 ---
 
-# 16. Create MongoDB Collections and Indexes
+# 18. MongoDB — Create Collections and Indexes
 
-Source file:
+File:
 
 ```text
 mongo/01_collections_and_indexes.js
@@ -599,28 +690,28 @@ Run:
 load("mongo/01_collections_and_indexes.js");
 ```
 
-Then inspect:
+Check WorkerLocations indexes:
 
 ```javascript
 db.WorkerLocations.getIndexes();
 ```
 
-Required geospatial index:
+The required geospatial index is:
 
 ```text
 location_2dsphere
 ```
 
-Required TTL behavior:
+The required TTL behavior is:
 
 ```text
 created_at
 expireAfterSeconds: 7200
 ```
 
-`7200` seconds = 2 hours.
+7200 seconds = 2 hours.
 
-Also inspect:
+Check review indexes:
 
 ```javascript
 db.GigReviews.getIndexes();
@@ -628,9 +719,9 @@ db.GigReviews.getIndexes();
 
 ---
 
-# 17. Generate MongoDB Stress-Test Data
+# 19. MongoDB — Generate Required Data
 
-The generator is:
+The MongoDB generator is:
 
 ```text
 data_generation/mongo_seeder.py
@@ -642,7 +733,7 @@ Run from the project root:
 python3 data_generation/mongo_seeder.py
 ```
 
-Verify the required geospatial scale:
+Verify WorkerLocations count:
 
 ```bash
 mongosh
@@ -660,30 +751,31 @@ Required:
 >= 500000
 ```
 
-Also verify:
+The target project scale is:
 
-```javascript
-db.Portfolios.countDocuments();
-db.GigReviews.countDocuments();
+```text
+500000 WorkerLocations
 ```
 
 ---
 
-# 18. WORKFLOW 3 — NEAREST AVAILABLE WORKER
+# 20. WORKFLOW 3 — Nearest Available Worker
 
-## Assignment Requirement
+## Requirement
 
-> Write a `$geoNear` pipeline to find the closest available freelancer to a physical job site.
+The assignment asks for:
 
-## Source File
+> A `$geoNear` pipeline to find the closest available freelancer to a physical job site.
+
+## Implementation
+
+File:
 
 ```text
 mongo/02_workflow3_geonear.js
 ```
 
-## Required MongoDB Concepts
-
-The script uses:
+The pipeline uses:
 
 ```text
 $geoNear
@@ -693,28 +785,18 @@ spherical: true
 is_available: true
 ```
 
-The `WorkerLocations.location` field uses GeoJSON:
-
-```text
-{
-  type: "Point",
-  coordinates: [longitude, latitude]
-}
-```
-
-## Run the Workflow
+## Run
 
 From `mongosh`:
 
 ```javascript
 use("gigtask");
-
 load("mongo/02_workflow3_geonear.js");
 ```
 
-The script should print nearby available workers.
+The output should show nearby workers and their distance.
 
-Expected output contains fields such as:
+Expected fields include:
 
 ```text
 freelancer_id
@@ -723,7 +805,7 @@ location
 created_at
 ```
 
-## Verify the Index
+## Verify Geospatial Index
 
 ```javascript
 db.WorkerLocations.getIndexes();
@@ -735,7 +817,7 @@ Confirm:
 location_2dsphere
 ```
 
-## Workflow 3 Pass Condition
+### Workflow 3 Pass
 
 ```text
 [ ] $geoNear is used
@@ -748,21 +830,23 @@ location_2dsphere
 
 ---
 
-# 19. WORKFLOW 4 — MULTI-FACETED REVIEW ANALYTICS
+# 21. WORKFLOW 4 — Multi-Faceted Review Analytics
 
-## Assignment Requirement
+## Requirement
 
-> Write a `$facet` pipeline extracting rating distributions, top skill-tags via `$unwind`, and overall worker ratings.
+The assignment asks for:
 
-## Source File
+> A `$facet` pipeline extracting rating distributions, top skill-tags via `$unwind`, and overall worker ratings.
+
+## Implementation
+
+File:
 
 ```text
 mongo/03_workflow4_facet.js
 ```
 
-## Required Facets
-
-The script contains:
+The three facet branches are:
 
 ```text
 rating_distribution
@@ -770,68 +854,41 @@ top_skill_tags
 overall_worker_ratings
 ```
 
-The skill-tag analysis uses:
+The top skill-tag branch uses:
 
-```javascript
+```text
 $unwind: "$skill_tags"
 ```
 
-## Run the Workflow
+## Run
 
 From `mongosh`:
 
 ```javascript
 use("gigtask");
-
 load("mongo/03_workflow4_facet.js");
 ```
 
-Expected output contains:
+The output should contain all three sections.
 
-```text
-rating_distribution
-top_skill_tags
-overall_worker_ratings
-```
+### Rating Distribution
 
-### What Each Facet Does
+Groups reviews by rating and counts them.
 
-### Rating distribution
+### Top Skill Tags
 
-Groups reviews by:
+Uses `$unwind` on `skill_tags`, groups tags, calculates usage and average rating, sorts them, and returns the top tags.
 
-```text
-rating
-```
+### Overall Worker Ratings
 
-and counts reviews.
-
-### Top skill tags
-
-Uses:
-
-```text
-$unwind skill_tags
-```
-
-then calculates tag usage and average rating, sorts the results, and returns the top tags.
-
-### Overall worker ratings
-
-Groups reviews by:
-
-```text
-freelancer_id
-```
-
-and calculates:
+Groups reviews by freelancer and calculates:
 
 ```text
 average_rating
 review_count
 ```
 
-## Workflow 4 Pass Condition
+### Workflow 4 Pass
 
 ```text
 [ ] $facet is used
@@ -844,15 +901,12 @@ review_count
 
 ---
 
-# 20. PostgreSQL Requirement Verification
+# 22. PostgreSQL — Verify All Engineering Requirements
 
-## Row Counts
+Open:
 
-```sql
-SELECT COUNT(*) FROM clients;
-SELECT COUNT(*) FROM freelancers;
-SELECT COUNT(*) FROM contracts;
-SELECT COUNT(*) FROM wallet_audit_logs;
+```bash
+psql "$DATABASE_URL"
 ```
 
 ## Trigger
@@ -868,12 +922,46 @@ WHERE NOT t.tgisinternal
   AND t.tgname = 'trg_escrow_audit';
 ```
 
+Expected:
+
+```text
+public | clients | trg_escrow_audit
+```
+
 ## Partial Unique Index
 
 ```sql
 SELECT indexname, indexdef
 FROM pg_indexes
 WHERE indexname = 'idx_active_gig';
+```
+
+The definition must contain:
+
+```text
+UNIQUE
+```
+
+and:
+
+```text
+WHERE status = 'IN PROGRESS'
+```
+
+## Completed-Contract Index
+
+```sql
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE indexname = 'idx_contracts_completed_freelancer';
+```
+
+## Freelancer Availability Index
+
+```sql
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE indexname = 'idx_freelancers_available';
 ```
 
 ## Materialized View
@@ -883,17 +971,36 @@ SELECT COUNT(*)
 FROM freelancer_lifetime_stats;
 ```
 
-## Refresh Procedure
+Sample:
 
 ```sql
-SELECT routine_name, routine_type
-FROM information_schema.routines
-WHERE routine_name = 'refresh_freelancer_lifetime_stats';
+SELECT *
+FROM freelancer_lifetime_stats
+ORDER BY total_earnings DESC
+LIMIT 5;
+```
+
+## Concurrent Refresh
+
+```sql
+CALL refresh_freelancer_lifetime_stats();
 ```
 
 ---
 
-# 21. MongoDB Requirement Verification
+# 23. MongoDB — Verify All Engineering Requirements
+
+Open:
+
+```bash
+mongosh
+```
+
+Then:
+
+```javascript
+use("gigtask");
+```
 
 ## WorkerLocations Scale
 
@@ -907,7 +1014,7 @@ Required:
 >= 500000
 ```
 
-## Worker Location Indexes
+## WorkerLocations Indexes
 
 ```javascript
 db.WorkerLocations.getIndexes();
@@ -917,10 +1024,23 @@ Required:
 
 ```text
 location_2dsphere
-created_at TTL with expireAfterSeconds = 7200
+created_at TTL
+expireAfterSeconds: 7200
 ```
 
-## Review Indexes
+## Portfolios
+
+```javascript
+db.Portfolios.countDocuments();
+```
+
+## GigReviews
+
+```javascript
+db.GigReviews.countDocuments();
+```
+
+## GigReviews Indexes
 
 ```javascript
 db.GigReviews.getIndexes();
@@ -928,52 +1048,51 @@ db.GigReviews.getIndexes();
 
 ---
 
-# 22. Performance Evidence
+# 24. Performance Evidence
 
-Only these two performance files belong in the submission:
+The submission contains exactly these two performance files:
 
 ```text
-performance/
-├── postgres_explain_analyzes.txt
-└── mongo_execution_stats.json
+performance/postgres_explain_analyzes.txt
+performance/mongo_execution_stats.json
 ```
 
 ## PostgreSQL
 
-Use:
+Actual PostgreSQL plans should be collected with:
 
 ```sql
 EXPLAIN (ANALYZE, BUFFERS)
-<query>;
+<QUERY>;
 ```
 
-Save the actual output in:
+The actual output belongs in:
 
 ```text
 performance/postgres_explain_analyzes.txt
 ```
 
-Do not invent execution times or plan information.
+Do not fabricate execution times or plan operators.
 
-A sequential scan in an actual plan is not automatically a failure. The submitted file must report the real PostgreSQL plan.
+A sequential scan is not automatically a failure. Report the actual PostgreSQL plan produced by the database.
 
 ## MongoDB
 
-Use:
+Actual MongoDB execution evidence should be collected with:
 
 ```javascript
 db.<collection>.explain("executionStats").aggregate([
-    // actual workflow pipeline
+    // workflow pipeline
 ]);
 ```
 
-Save actual evidence in:
+The actual evidence belongs in:
 
 ```text
 performance/mongo_execution_stats.json
 ```
 
-For Workflow 3, look for:
+For Workflow 3, important plan evidence includes:
 
 ```text
 GEO_NEAR_2DSPHERE
@@ -991,143 +1110,204 @@ totalDocsExamined
 
 ---
 
-# 23. Complete Evaluator Run Order
+# 25. Exact Evaluator Run Order
 
-A person cloning the repository should run the following in order:
+A clean-clone evaluator can follow this order:
 
 ```text
-1. Clone GitHub repository
+1. git clone <YOUR_GITHUB_REPOSITORY_URL>
 2. cd GigTask
-3. Create Python virtual environment
-4. Install requirements
-5. Create PostgreSQL database
-6. Set DATABASE_URL
-7. Run sql/01_schema_ddl.sql
-8. Run sql/02_indexes.sql
-9. Run sql/03_triggers_and_audit.sql
-10. Run sql/04_stored_procedures.sql
-11. Run sql/05_materialized_views.sql
-12. Run data_generation/postgres_seeder.py
-13. Verify PostgreSQL counts
-14. Test Workflow 1
-15. Run Workflow 2
-16. Start MongoDB
-17. Run mongo/01_collections_and_indexes.js
-18. Run data_generation/mongo_seeder.py
-19. Verify MongoDB counts
-20. Run Workflow 3
-21. Run Workflow 4
-22. Verify PostgreSQL indexes/triggers/views
-23. Verify MongoDB indexes
-24. Check PostgreSQL performance evidence
-25. Check MongoDB performance evidence
+3. python3 -m venv venv
+4. source venv/bin/activate
+5. pip install -r requirements.txt
+6. Create PostgreSQL database gigtask
+7. export DATABASE_URL="..."
+8. psql "$DATABASE_URL" -f sql/01_schema_ddl.sql
+9. psql "$DATABASE_URL" -f sql/02_indexes.sql
+10. psql "$DATABASE_URL" -f sql/03_triggers_and_audit.sql
+11. psql "$DATABASE_URL" -f sql/04_stored_procedures.sql
+12. psql "$DATABASE_URL" -f sql/05_materialized_views.sql
+13. python3 data_generation/postgres_seeder.py
+14. Verify PostgreSQL counts
+15. Test Workflow 1
+16. Run Workflow 2
+17. Start MongoDB
+18. mongosh
+19. use("gigtask")
+20. load("mongo/01_collections_and_indexes.js")
+21. python3 data_generation/mongo_seeder.py
+22. Verify MongoDB counts
+23. Run Workflow 3
+24. Run Workflow 4
+25. Verify PostgreSQL indexes/trigger/view
+26. Verify MongoDB indexes
+27. Check performance/postgres_explain_analyzes.txt
+28. Check performance/mongo_execution_stats.json
 ```
 
 ---
 
-# 24. Final Submission Checklist
+# 26. Final Assignment Checklist
 
-## Data Scale
+## Data Generation
 
-- [ ] At least 50,000 PostgreSQL contracts
-- [ ] At least 100,000 PostgreSQL audit/ledger entries
-- [ ] At least 500,000 MongoDB WorkerLocations pings
+```text
+[ ] PostgreSQL >= 50,000 contracts
+[ ] PostgreSQL >= 100,000 audit/ledger entries
+[ ] MongoDB >= 500,000 WorkerLocations pings
+```
 
-## Workflow 1
+## Workflow 1 — Atomic Gig Funding
 
-- [ ] `fund_gig()` stored procedure exists
-- [ ] Client funds are deducted
-- [ ] Contract is created
-- [ ] Contract status is `FUNDED`
-- [ ] Audit entry is generated
-- [ ] Operation is atomic
+```text
+[ ] PL/pgSQL procedure exists
+[ ] Client balance is safely checked
+[ ] Client row is locked
+[ ] Funds are deducted
+[ ] FUNDED contract is created
+[ ] Audit entry is generated
+[ ] Operation is atomic
+```
 
-## Workflow 2
+## Workflow 2 — SQL Window Analytics
 
-- [ ] CTEs
-- [ ] Daily revenue
-- [ ] 7-day moving average
-- [ ] Window function
-- [ ] `DENSE_RANK()`
-- [ ] Per-freelancer ranking
+```text
+[ ] CTEs
+[ ] Daily revenue
+[ ] 7-day moving average
+[ ] Window function
+[ ] Per-freelancer partition
+[ ] DENSE_RANK()
+```
 
-## Workflow 3
+## Workflow 3 — Nearest Available Worker
 
-- [ ] `$geoNear`
-- [ ] GeoJSON Point
-- [ ] Available-worker filter
-- [ ] Distance calculation
-- [ ] `location_2dsphere`
+```text
+[ ] $geoNear
+[ ] GeoJSON Point
+[ ] Available-worker filtering
+[ ] Distance calculation
+[ ] 2dsphere index
+```
 
-## Workflow 4
+## Workflow 4 — Multi-Faceted Review Analytics
 
-- [ ] `$facet`
-- [ ] Rating distribution
-- [ ] `$unwind` skill tags
-- [ ] Top skill tags
-- [ ] Overall worker ratings
+```text
+[ ] $facet
+[ ] Rating distribution
+[ ] $unwind skill_tags
+[ ] Top skill tags
+[ ] Overall worker ratings
+```
 
 ## PostgreSQL Engineering
 
-- [ ] Escrow audit trigger
-- [ ] Partial unique active-gig index
-- [ ] Materialized view
-- [ ] Concurrent refresh
-- [ ] Required indexes
+```text
+[ ] Escrow audit trigger
+[ ] Partial unique active-gig index
+[ ] Completed-contract index
+[ ] Freelancer availability index
+[ ] Materialized view
+[ ] Unique index on materialized view
+[ ] Concurrent refresh procedure
+```
 
 ## MongoDB Engineering
 
-- [ ] 2dsphere index
-- [ ] 2-hour TTL index
-- [ ] Review indexes
-- [ ] Required collections
+```text
+[ ] Portfolios collection
+[ ] GigReviews collection
+[ ] WorkerLocations collection
+[ ] 2dsphere index
+[ ] 2-hour TTL
+[ ] Review indexes
+```
 
 ## Performance
 
-- [ ] `performance/postgres_explain_analyzes.txt`
-- [ ] `performance/mongo_execution_stats.json`
-- [ ] Actual execution evidence
-- [ ] No fabricated metrics
+```text
+[ ] performance/postgres_explain_analyzes.txt
+[ ] performance/mongo_execution_stats.json
+[ ] Actual execution evidence
+[ ] No fabricated metrics
+```
 
 ---
 
-# 25. Quick Rule for the Evaluator
+# 27. Important Terminal / Database Prompt Difference
 
-If you want to check only the four complex workflows:
+## Terminal
 
-### Workflow 1
+Looks like:
 
-```bash
-psql "$DATABASE_URL" -f sql/04_stored_procedures.sql
+```text
+Dev-MacBook:GigTask user$
 ```
 
-Then inside `psql`:
-
-```sql
-CALL fund_gig('<CLIENT_ID>', '<FREELANCER_ID>', 100.00);
-```
-
-### Workflow 2
+Use:
 
 ```bash
-psql "$DATABASE_URL" -f sql/06_window_analytics.sql
-```
-
-### Workflow 3
-
-```bash
+cd
+python3
+pip
+psql
 mongosh
 ```
 
-```javascript
-use("gigtask");
-load("mongo/02_workflow3_geonear.js");
+## PostgreSQL
+
+Looks like:
+
+```text
+gigtask=#
 ```
 
-### Workflow 4
+Use:
 
-```javascript
-load("mongo/03_workflow4_facet.js");
+```sql
+SELECT ...
+CALL ...
+CREATE ...
+EXPLAIN ...
 ```
 
-That directly demonstrates the four requirements from the assignment.
+## MongoDB
+
+Looks like:
+
+```text
+gigtask>
+```
+
+Use:
+
+```javascript
+db.WorkerLocations.countDocuments()
+db.GigReviews.getIndexes()
+load("mongo/02_workflow3_geonear.js")
+```
+
+This distinction is important when following the commands in this README.
+
+---
+
+# 28. Definition of Done
+
+The GitHub project is ready for evaluation when the evaluator can clone it and successfully verify all of the following:
+
+```text
+[x] PostgreSQL data-scale requirement
+[x] MongoDB data-scale requirement
+[x] Workflow 1 — Atomic Gig Funding
+[x] Workflow 2 — SQL Window Analytics
+[x] Workflow 3 — Nearest Available Worker
+[x] Workflow 4 — Multi-Faceted Review Analytics
+[x] PostgreSQL trigger
+[x] PostgreSQL partial unique index
+[x] PostgreSQL materialized view
+[x] MongoDB 2dsphere index
+[x] MongoDB 2-hour TTL
+[x] Performance evidence files
+```
+
+The `[x]` marks above are the final target state. The evaluator should verify each item by running the commands in this README.
