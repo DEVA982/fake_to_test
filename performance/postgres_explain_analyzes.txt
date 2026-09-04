@@ -1,0 +1,323 @@
+GigTask - PostgreSQL Performance Proof
+Workflow 2: 7-day moving average of contract revenue per freelancer, ranked with DENSE_RANK()
+
+Raw EXPLAIN (ANALYZE, BUFFERS) output from the actual GigTask PostgreSQL run:
+
+QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+:
+                                                                                  QUERY PLAN                                                                                  
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=9888.64..9889.14 rows=198 width=92) (actual time=226.543..229.673 rows=4998 loops=1)
+   Sort Key: (dense_rank() OVER (?)), latest.freelancer_id
+   Sort Method: quicksort  Memory: 546kB
+   Buffers: shared hit=843
+   ->  WindowAgg  (cost=9877.13..9881.09 rows=198 width=92) (actual time=223.944..225.280 rows=4998 loops=1)
+         Buffers: shared hit=837
+         ->  Sort  (cost=9877.13..9877.63 rows=198 width=52) (actual time=223.935..224.044 rows=4998 loops=1)
+               Sort Key: latest.moving_avg_7d DESC
+               Sort Method: quicksort  Memory: 468kB
+               Buffers: shared hit=837
+               ->  Subquery Scan on latest  (cost=4604.20..9869.58 rows=198 width=52) (actual time=152.526..221.637 rows=4998 loops=1)
+                     Filter: (latest.rn = 1)
+                     Buffers: shared hit=834
+                     ->  WindowAgg  (cost=4604.20..9373.98 rows=39648 width=92) (actual time=152.524..221.20
+5 rows=4998 loops=1)
+                           Run Condition: (row_number() OVER (?) <= 1)
+                           Buffers: shared hit=834
+                           ->  Incremental Sort  (cost=4604.20..8680.14 rows=39648 width=52) (actual time=15
+2.515..217.354 rows=38121 loops=1)
+                                 Sort Key: moving.freelancer_id, moving.revenue_day DESC
+                                 Presorted Key: moving.freelancer_id
+                                 Full-sort Groups: 1068  Sort Method: quicksort  Average Memory: 27kB  Peak 
+Memory: 27kB
+                                 Buffers: shared hit=834
+                                 ->  Subquery Scan on moving  (cost=4586.23..6667.75 rows=39648 width=52) (a
+ctual time=152.344..208.630 rows=38121 loops=1)
+                                       Buffers: shared hit=834
+                                       ->  WindowAgg  (cost=4586.23..6271.27 rows=39648 width=84) (actual ti
+me=152.343..206.003 rows=38121 loops=1)
+                                             Buffers: shared hit=834
+                                             ->  GroupAggregate  (cost=4586.23..5577.43 rows=39648 width=52)
+ (actual time=152.277..168.632 rows=38121 loops=1)
+                                                   Group Key: contracts.freelancer_id, ((contracts.created_a
+t)::date)
+                                                   Buffers: shared hit=834
+                                                   ->  Sort  (cost=4586.23..4685.35 rows=39648 width=26) (ac
+tual time=152.183..153.682 rows=39741 loops=1)
+                                                         Sort Key: contracts.freelancer_id, ((contracts.crea
+ted_at)::date)
+                                                         Sort Method: quicksort  Memory: 3403kB
+                                                         Buffers: shared hit=834
+                                                         ->  Seq Scan on contracts  (cost=0.00..1558.12 rows
+=39648 width=26) (actual time=20.372..122.953 rows=39741 loops=1)
+                                                               Filter: ((status)::text = 'COMPLETED'::text)
+                                                               Rows Removed by Filter: 10259
+                                                               Buffers: shared hit=834
+ Planning:
+   Buffers: shared hit=242
+ Planning Time: 15.818 ms
+ Execution Time: 230.767 ms
