@@ -1,0 +1,5 @@
+{
+  "Portfolios":{"freelancer_id":"string","skills":["string"],"certifications":[{"name":"string","issuer":"string","year":"int"}],"updated_at":"date"},
+  "GigReviews":{"freelancer_id":"string","rating":"int 1..5","skill_tags":["string"],"comment":"string","created_at":"date"},
+  "WorkerLocations":{"freelancer_id":"string","is_available":"boolean","location":{"type":"Point","coordinates":["longitude","latitude"]},"created_at":"date"}
+}
